@@ -1,1 +1,0 @@
-/home/thepanable/.splashkit/dotnet/SplashKit.cs
