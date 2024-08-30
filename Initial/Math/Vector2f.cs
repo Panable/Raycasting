@@ -10,13 +10,6 @@ public class Vector2f
     public float Magnitude { get => MathF.Sqrt((X * X) + (Y * Y));}
     public Vector2f Normalized { get => new Vector2f(X / Magnitude, Y / Magnitude); }
 
-    public void Normalize()
-    {
-        Vector2f normalizedVector = Normalized;
-        X = normalizedVector.X;
-        Y = normalizedVector.X;
-    }
-
     public static Vector2f operator+(Vector2f a, Vector2f b)
     {
         float x = a.X + b.X;
@@ -32,10 +25,55 @@ public class Vector2f
         return new Vector2f(x, y);
     }
 
+    public static Vector2f operator*(Vector2f a, float b)
+    {
+        float x = a.X * b;
+        float y = a.Y * b;
+
+        return new Vector2f(x, y);
+    }
+
+    public static Vector2f operator*(float a, Vector2f b)
+    {
+        float x = b.X * a;
+        float y = b.Y * a;
+
+        return new Vector2f(x, y);
+    }
+
     public Vector2f(float x, float y)
     {
         X = x;
         Y = y;
     }
 
+    public Vector2f(SplashKitSDK.Point2D pt)
+    {
+        X = (float)pt.X;
+        Y = (float)pt.Y;
+    }
+
+    public Vector2f() : this(0, 0)
+    {
+    }
+
+    public void Normalize()
+    {
+        Vector2f normalizedVector = Normalized;
+        X = normalizedVector.X;
+        Y = normalizedVector.X;
+    }
+
+    public static Vector2f Zero()
+    {
+        return new Vector2f(0.0f, 0.0f);
+    }
+    
+    public static float Distance(Vector2f a, Vector2f b)
+    {
+        Vector2f dir = b - a;
+        return dir.Magnitude;
+    }
+
+    public string ToStr() => $"{X}, {Y}";
 }
