@@ -1,0 +1,14 @@
+/home/thepanable/Dev/personal/Raycasting/Initial/bin/Debug/net8.0/Initial
+/home/thepanable/Dev/personal/Raycasting/Initial/bin/Debug/net8.0/Initial.deps.json
+/home/thepanable/Dev/personal/Raycasting/Initial/bin/Debug/net8.0/Initial.runtimeconfig.json
+/home/thepanable/Dev/personal/Raycasting/Initial/bin/Debug/net8.0/Initial.dll
+/home/thepanable/Dev/personal/Raycasting/Initial/bin/Debug/net8.0/Initial.pdb
+/home/thepanable/Dev/personal/Raycasting/Initial/obj/Debug/net8.0/Initial.GeneratedMSBuildEditorConfig.editorconfig
+/home/thepanable/Dev/personal/Raycasting/Initial/obj/Debug/net8.0/Initial.AssemblyInfoInputs.cache
+/home/thepanable/Dev/personal/Raycasting/Initial/obj/Debug/net8.0/Initial.AssemblyInfo.cs
+/home/thepanable/Dev/personal/Raycasting/Initial/obj/Debug/net8.0/Initial.csproj.CoreCompileInputs.cache
+/home/thepanable/Dev/personal/Raycasting/Initial/obj/Debug/net8.0/Initial.dll
+/home/thepanable/Dev/personal/Raycasting/Initial/obj/Debug/net8.0/refint/Initial.dll
+/home/thepanable/Dev/personal/Raycasting/Initial/obj/Debug/net8.0/Initial.pdb
+/home/thepanable/Dev/personal/Raycasting/Initial/obj/Debug/net8.0/Initial.genruntimeconfig.cache
+/home/thepanable/Dev/personal/Raycasting/Initial/obj/Debug/net8.0/ref/Initial.dll
