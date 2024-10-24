@@ -7,10 +7,10 @@ public class Raycaster
     private Map _map;
     private Player _player;
 
-    public Raycaster(Map map, Player player)
+    public Raycaster(Player player, Map map)
     {
-        _map = map;
         _player = player;
+        _map = map;
     }
 
     public struct RaycastDetails
@@ -85,12 +85,19 @@ public class Raycaster
 
             bool outsideX = (int)coord.X > Map.GRID_COLS;
             bool outsideY = (int)coord.Y > Map.GRID_ROWS;
-            bool wallFound = _map.isWall(mapCheck.X, mapCheck.Y);
-
-            if (wallFound || outsideX || outsideY)
+            if (outsideX || outsideY)
             {
                 hitCoordinate = start + (dir.Normalized * distance);
                 Console.WriteLine($"hit found at {coord.ToStr()} map coords {mapCheck.ToStr()}");
+                break;
+            }
+
+            bool wallFound = _map.isWall(mapCheck.X, mapCheck.Y);
+            if (wallFound)
+            {
+                hitCoordinate = start + (dir.Normalized * distance);
+                Console.WriteLine($"hit found at {coord.ToStr()} map coords {mapCheck.ToStr()}");
+                break;
             }
         }
 
