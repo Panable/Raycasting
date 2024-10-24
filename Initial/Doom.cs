@@ -4,7 +4,6 @@ namespace Initial;
 
 public class Doom
 {
-
     /* Window Dimensions */
     public const float SCALE = 2.5f;
     public const int WIDTH  = (int)(800 * SCALE);
@@ -44,12 +43,37 @@ public class Doom
     Vector2f circleA = new Vector2f(5.25f, 5.5f);
     Vector2f circleB = new Vector2f(3.25f, 1.0f);
 
+
     public void Update(double deltaTime)
     {
         Vector2f pos = new Vector2f(SplashKit.MousePosition());
         pos.X /= CELL_WIDTH;
         pos.Y /= CELL_HEIGHT;
         circleB = pos;
+
+        Vector2f keyInput = new Vector2f();
+        if (SplashKit.KeyDown(KeyCode.WKey))
+        {
+            keyInput.Y = -1.0f;
+        }
+        if (SplashKit.KeyDown(KeyCode.AKey))
+        {
+            keyInput.X = -1.0f;
+        }
+        if (SplashKit.KeyDown(KeyCode.SKey))
+        {
+            keyInput.Y = 1.0f;
+        }
+        if (SplashKit.KeyDown(KeyCode.DKey))
+        {
+            keyInput.X = 1.0f;
+        }
+        float speed = 2.0f;
+        keyInput.Normalize();
+        // Console.WriteLine(keyInput.ToStr());
+        keyInput *= (float)deltaTime * speed;
+        circleA += keyInput;
+
         DDA();
     }
 
@@ -74,7 +98,7 @@ public class Doom
         }
 
         DanRenderer.DrawCircle(Color.CornflowerBlue, circleA, 25);
-        DanRenderer.DrawCircle(Color.CornflowerBlue, circleB, 25);
+        DanRenderer.DrawCircle(Color.Plum, circleB, 25);
         DanRenderer.DrawLine(Color.Tan, circleA, circleB, 1);
     }
 
@@ -119,7 +143,7 @@ public class Doom
         while (distance < dirMagnitude)
         {
             Vector2f coord = start + (dir.Normalized * distance);
-            DanRenderer.DrawCircle(Color.Red, coord, 4.5f);
+            DanRenderer.DrawCircle(Color.Red, coord, 8.5f);
             if (len.X < len.Y)
             {
                 distance = len.X;

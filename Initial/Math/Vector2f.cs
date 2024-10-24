@@ -7,17 +7,31 @@ public class Vector2f
 
     public float X { get => _x; set => _x = value; }
     public float Y { get => _y; set => _y = value; }
-    public float Magnitude { get => MathF.Sqrt((X * X) + (Y * Y));}
-    public Vector2f Normalized { get => new Vector2f(X / Magnitude, Y / Magnitude); }
+    public float Magnitude { get => MathF.Sqrt((X * X) + (Y * Y)); }
+    public static Vector2f Zero
+    {
+        get
+        {
+            return new Vector2f(0.0f, 0.0f);
+        }
+    }
+    public Vector2f Normalized
+    {
+        get
+        {
+            if (Magnitude == 0) return Vector2f.Zero;
+            return new Vector2f(X / Magnitude, Y / Magnitude);
+        }
+    }
 
-    public static Vector2f operator+(Vector2f a, Vector2f b)
+    public static Vector2f operator +(Vector2f a, Vector2f b)
     {
         float x = a.X + b.X;
         float y = a.Y + b.Y;
         return new Vector2f(x, y);
     }
 
-    public static Vector2f operator-(Vector2f a, Vector2f b)
+    public static Vector2f operator -(Vector2f a, Vector2f b)
     {
         float x = a.X - b.X;
         float y = a.Y - b.Y;
@@ -25,7 +39,7 @@ public class Vector2f
         return new Vector2f(x, y);
     }
 
-    public static Vector2f operator*(Vector2f a, float b)
+    public static Vector2f operator *(Vector2f a, float b)
     {
         float x = a.X * b;
         float y = a.Y * b;
@@ -33,7 +47,7 @@ public class Vector2f
         return new Vector2f(x, y);
     }
 
-    public static Vector2f operator*(float a, Vector2f b)
+    public static Vector2f operator *(float a, Vector2f b)
     {
         float x = b.X * a;
         float y = b.Y * a;
@@ -53,7 +67,7 @@ public class Vector2f
         Y = (float)pt.Y;
     }
 
-    public Vector2f() : this(0, 0)
+    public Vector2f() : this(0.0f, 0.0f)
     {
     }
 
@@ -61,14 +75,9 @@ public class Vector2f
     {
         Vector2f normalizedVector = Normalized;
         X = normalizedVector.X;
-        Y = normalizedVector.X;
+        Y = normalizedVector.Y;
     }
 
-    public static Vector2f Zero()
-    {
-        return new Vector2f(0.0f, 0.0f);
-    }
-    
     public static float Distance(Vector2f a, Vector2f b)
     {
         Vector2f dir = b - a;
