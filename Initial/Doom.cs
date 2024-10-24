@@ -1,158 +1,177 @@
 using SplashKitSDK;
 using Math;
-namespace Initial;
 
-public class Doom
+namespace Initial
 {
-    /* Window Dimensions */
-    public const float SCALE = 2.5f;
-    public const int WIDTH  = (int)(800 * SCALE);
-    public const int HEIGHT = (int)(800 * SCALE);
-
-    /* Grid */
-    public const int GRID_COLS = 10;
-    public const int GRID_ROWS = 10;
-
-    public const float CELL_WIDTH = WIDTH / GRID_COLS;
-    public const float CELL_HEIGHT = HEIGHT / GRID_ROWS;
-
-    public Doom()
+    public class Doom
     {
-    }
+        /* Window Dimensions */
+        public const float SCALE = 2.5f;
+        public const int WIDTH = (int)(800 * SCALE);
+        public const int HEIGHT = (int)(800 * SCALE);
 
-    public void Run()
-    {
-        SplashKit.HideMouse();
-        Color backgroundColor = SplashKit.StringToColor("#181818");
-        Window window = new Window("Raycasting", WIDTH, HEIGHT);
-        double _lastTime = SplashKit.CurrentTicks();
-        while (!window.CloseRequested)
+        /* Grid */
+        public const int GRID_COLS = 10;
+        public const int GRID_ROWS = 10;
+
+        public const float CELL_WIDTH = WIDTH / GRID_COLS;
+        public const float CELL_HEIGHT = HEIGHT / GRID_ROWS;
+
+        /* Map Array - 0: empty space, 1: wall */
+        public int[,] map = new int[GRID_ROWS, GRID_COLS]
         {
-            // Calculate deltaTime
-            double currentTime = SplashKit.CurrentTicks();
-            double deltaTime = (currentTime - _lastTime) / 1000.0;
-            _lastTime = currentTime;
-            SplashKit.ProcessEvents();
-            SplashKit.ClearScreen(backgroundColor);
-            Update(deltaTime);
-            Render();
-            SplashKit.RefreshScreen(144);
-        }
-    }
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, // 10 elements
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1}, // 10 elements
+            {1, 0, 0, 0, 1, 1, 0, 0, 0, 1}, // 10 elements
+            {1, 0, 0, 0, 0, 1, 0, 0, 0, 1}, // 10 elements
+            {1, 0, 1, 1, 0, 0, 0, 1, 0, 1}, // 10 elements
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1}, // 10 elements
+            {1, 1, 0, 0, 0, 1, 1, 1, 0, 1},  // 10 elements
+            {1, 1, 0, 0, 0, 1, 1, 1, 0, 1},  // 10 elements
+            {1, 1, 0, 0, 0, 1, 1, 1, 0, 1},  // 10 elements
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}  // 10 elements
+        };
 
-    Vector2f circleA = new Vector2f(5.25f, 5.5f);
-    Vector2f circleB = new Vector2f(3.25f, 1.0f);
+        Vector2f playerPos = new Vector2f(2.5f, 2.5f);
+        Vector2f playerDir = new Vector2f(-1.0f, 0.0f);
+        Vector2f plane = new Vector2f(0.0f, 0.66f); // FOV
 
+        public Doom() { }
 
-    public void Update(double deltaTime)
-    {
-        Vector2f pos = new Vector2f(SplashKit.MousePosition());
-        pos.X /= CELL_WIDTH;
-        pos.Y /= CELL_HEIGHT;
-        circleB = pos;
-
-        Vector2f keyInput = new Vector2f();
-        if (SplashKit.KeyDown(KeyCode.WKey))
+        public void Run()
         {
-            keyInput.Y = -1.0f;
-        }
-        if (SplashKit.KeyDown(KeyCode.AKey))
-        {
-            keyInput.X = -1.0f;
-        }
-        if (SplashKit.KeyDown(KeyCode.SKey))
-        {
-            keyInput.Y = 1.0f;
-        }
-        if (SplashKit.KeyDown(KeyCode.DKey))
-        {
-            keyInput.X = 1.0f;
-        }
-        float speed = 2.0f;
-        keyInput.Normalize();
-        // Console.WriteLine(keyInput.ToStr());
-        keyInput *= (float)deltaTime * speed;
-        circleA += keyInput;
-
-        DDA();
-    }
-
-    public void Render()
-    {
-        /* Draw Board */
-        Color color = SplashKit.StringToColor("#505050");
-        int lineWidth = 2;
-
-        for (int x = 0; x <= GRID_COLS; ++x)
-        {
-            Vector2f start = new Vector2f(x, 0);
-            Vector2f end = new Vector2f(x, GRID_ROWS);
-            DanRenderer.DrawLine(color, start, end, lineWidth);
-        }
-
-        for (int y = 0; y <= GRID_ROWS; ++y)
-        {
-            Vector2f start = new Vector2f(0, y);
-            Vector2f end = new Vector2f(GRID_COLS, y);
-            DanRenderer.DrawLine(color, start, end, lineWidth);
-        }
-
-        DanRenderer.DrawCircle(Color.CornflowerBlue, circleA, 25);
-        DanRenderer.DrawCircle(Color.Plum, circleB, 25);
-        DanRenderer.DrawLine(Color.Tan, circleA, circleB, 1);
-    }
-
-    public void DDA()
-    {
-        Vector2f start = circleA;
-        Vector2f dir = circleB - circleA;
-        float dirMagnitude = dir.Magnitude;
-
-        Vector2f stepSize = new Vector2f(dirMagnitude / MathF.Abs(dir.X), dirMagnitude / MathF.Abs(dir.Y));
-        Vector2i stepSign = new Vector2i();
-
-        Vector2f len = new Vector2f();
-
-        if (dir.X < 0) // going left
-        {
-            stepSign.X = -1;
-            float mapX = MathF.Floor(start.X); //left side of grid
-            len.X = (start.X - mapX) * stepSize.X;
-        }
-        else // going right
-        {
-            stepSign.X = 1;
-            float mapX = MathF.Floor(start.X) + 1; //right side of grid
-            len.X = (mapX - start.X) * stepSize.X;
-        }
-
-        if (dir.Y < 0) // going up
-        {
-            stepSign.Y = -1;
-            float mapY = MathF.Floor(start.Y);     // top part of grid
-            len.Y = (start.Y - mapY) * stepSize.Y;
-        }
-        else // going down
-        {
-            stepSign.Y = 1;
-            float mapY = MathF.Floor(start.Y) + 1; // bottom part of grid
-            len.Y = (mapY - start.Y) * stepSize.Y;
-        }
-        float distance = 0.0f;
-        /*----------------------------------------*/
-        while (distance < dirMagnitude)
-        {
-            Vector2f coord = start + (dir.Normalized * distance);
-            DanRenderer.DrawCircle(Color.Red, coord, 8.5f);
-            if (len.X < len.Y)
+            SplashKit.HideMouse();
+            Color backgroundColor = SplashKit.StringToColor("#181818");
+            Window window = new Window("Raycasting", WIDTH, HEIGHT);
+            double _lastTime = SplashKit.CurrentTicks();
+            while (!window.CloseRequested)
             {
-                distance = len.X;
-                len.X += stepSize.X;
+                double currentTime = SplashKit.CurrentTicks();
+                double deltaTime = (currentTime - _lastTime) / 1000.0;
+                _lastTime = currentTime;
+                SplashKit.ProcessEvents();
+                SplashKit.ClearScreen(backgroundColor);
+                Update(deltaTime);
+                Render();
+                SplashKit.RefreshScreen(144);
             }
-            else
+        }
+
+        public void Update(double deltaTime)
+        {
+            // Handle player movement (WASD)
+            Vector2f moveDir = new Vector2f();
+            float speed = 2.0f;
+
+            if (SplashKit.KeyDown(KeyCode.WKey))
             {
-                distance = len.Y;
-                len.Y += stepSize.Y;
+                moveDir += playerDir;
+            }
+            if (SplashKit.KeyDown(KeyCode.SKey))
+            {
+                moveDir -= playerDir;
+            }
+            if (SplashKit.KeyDown(KeyCode.AKey))
+            {
+                Vector2f leftDir = new Vector2f(playerDir.Y, -playerDir.X); // rotate 90°
+                moveDir += leftDir;
+            }
+            if (SplashKit.KeyDown(KeyCode.DKey))
+            {
+                Vector2f rightDir = new Vector2f(-playerDir.Y, playerDir.X); // rotate -90°
+                moveDir += rightDir;
+            }
+
+            moveDir.Normalize();
+            moveDir *= speed * (float)deltaTime;
+            
+            // Check for collision before updating position
+            if (map[(int)(playerPos.Y + moveDir.Y), (int)playerPos.X] == 0) playerPos.Y += moveDir.Y;
+            if (map[(int)playerPos.Y, (int)(playerPos.X + moveDir.X)] == 0) playerPos.X += moveDir.X;
+        }
+
+        public void Render()
+        {
+            // Raycasting
+            for (int x = 0; x < WIDTH; x++)
+            {
+                float cameraX = 2 * x / (float)WIDTH - 1; // x-coordinate on the camera plane
+                Vector2f rayDir = playerDir + (plane * cameraX);
+
+                Vector2i mapPos = new Vector2i((int)playerPos.X, (int)playerPos.Y);
+
+                Vector2f sideDist = new Vector2f();
+                Vector2f deltaDist = new Vector2f(
+                    MathF.Abs(1 / rayDir.X),
+                    MathF.Abs(1 / rayDir.Y)
+                );
+                float perpWallDist;
+
+                Vector2i step = new Vector2i();
+                bool hit = false;
+                int side = 0; // 0: X side, 1: Y side
+
+                // Calculate step and initial sideDist
+                if (rayDir.X < 0)
+                {
+                    step.X = -1;
+                    sideDist.X = (playerPos.X - mapPos.X) * deltaDist.X;
+                }
+                else
+                {
+                    step.X = 1;
+                    sideDist.X = (mapPos.X + 1.0f - playerPos.X) * deltaDist.X;
+                }
+                if (rayDir.Y < 0)
+                {
+                    step.Y = -1;
+                    sideDist.Y = (playerPos.Y - mapPos.Y) * deltaDist.Y;
+                }
+                else
+                {
+                    step.Y = 1;
+                    sideDist.Y = (mapPos.Y + 1.0f - playerPos.Y) * deltaDist.Y;
+                }
+
+                // Perform DDA
+                while (!hit)
+                {
+                    if (sideDist.X < sideDist.Y)
+                    {
+                        sideDist.X += deltaDist.X;
+                        mapPos.X += step.X;
+                        side = 0;
+                    }
+                    else
+                    {
+                        sideDist.Y += deltaDist.Y;
+                        mapPos.Y += step.Y;
+                        side = 1;
+                    }
+
+                    if (map[mapPos.Y, mapPos.X] > 0) hit = true; // hit a wall
+                }
+
+                // Calculate distance projected on camera plane
+                if (side == 0)
+                    perpWallDist = (mapPos.X - playerPos.X + (1 - step.X) / 2) / rayDir.X;
+                else
+                    perpWallDist = (mapPos.Y - playerPos.Y + (1 - step.Y) / 2) / rayDir.Y;
+
+                // Calculate height of the wall line
+                int lineHeight = (int)(HEIGHT / perpWallDist);
+
+                // Calculate start and end points of the wall line
+                int drawStart = -lineHeight / 2 + HEIGHT / 2;
+                if (drawStart < 0) drawStart = 0;
+                int drawEnd = lineHeight / 2 + HEIGHT / 2;
+                if (drawEnd >= HEIGHT) drawEnd = HEIGHT - 1;
+
+                // Choose wall color (make it darker for Y side)
+                Color wallColor = (side == 1) ? Color.Gray : Color.LightGray;
+
+                // Draw the wall as a vertical line
+                SplashKit.DrawLine(wallColor, x, drawStart, x, drawEnd);
             }
         }
     }
