@@ -4,6 +4,13 @@ namespace Initial;
 
 public class DanRenderer
 {
+
+    public DanRenderer()
+    {
+    }
+
+
+
     public static void DrawCircle(Color color, Vector2f position, float radius)
     {
         SplashKit.FillCircle(color, position.X, position.Y, radius);

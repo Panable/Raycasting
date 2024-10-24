@@ -17,7 +17,6 @@ public class Doom
     public const float CELL_HEIGHT = HEIGHT / GRID_ROWS;
 
     Player player = new Player();
-
     Map map = new Map();
 
     public Doom()
@@ -85,7 +84,6 @@ public class Doom
                 }
             }
         }
-        
 
         DanRenderer.DrawCircle(Color.CornflowerBlue, DanRenderer.MapToWorld(player.Position) * scale, 25 * scale);
         Vector2f col = DDA();
