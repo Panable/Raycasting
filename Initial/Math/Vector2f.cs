@@ -15,12 +15,45 @@ public class Vector2f
             return new Vector2f(0.0f, 0.0f);
         }
     }
+
     public Vector2f Normalized
     {
         get
         {
             if (Magnitude == 0) return Vector2f.Zero;
             return new Vector2f(X / Magnitude, Y / Magnitude);
+        }
+    }
+
+    public static Vector2f Up
+    {
+        get
+        {
+            return new Vector2f(0.0f, 1.0f);
+        }
+    }
+
+    public static Vector2f Down
+    {
+        get
+        {
+            return new Vector2f(0.0f, -1.0f);
+        }
+    }
+
+    public static Vector2f Left
+    {
+        get
+        {
+            return new Vector2f(-1.0f, 0.0f);
+        }
+    }
+
+    public static Vector2f Right
+    {
+        get
+        {
+            return new Vector2f(1.0f, 0.0f);
         }
     }
 
@@ -82,6 +115,19 @@ public class Vector2f
     {
         Vector2f dir = b - a;
         return dir.Magnitude;
+    }
+
+    // https://matthew-brett.github.io/teaching/rotation_2d.html
+    public void Rotate(float angle)
+    {
+        // x = x*cosθ - y * sinθ
+        // y = x*sinθ + y * cosθ
+
+        float cos = MathF.Cos(angle);
+        float sin = MathF.Sin(angle);
+
+        X = X * cos - Y * sin;
+        Y = X * sin + Y * cos;
     }
 
     public string ToStr() => $"{X}, {Y}";

@@ -6,7 +6,7 @@ public class Doom
 {
     /* Window Dimensions */
     public const float SCALE = 2.5f;
-    public const int WIDTH  = (int)(800 * SCALE);
+    public const int WIDTH = (int)(800 * SCALE);
     public const int HEIGHT = (int)(800 * SCALE);
 
     /* Grid */
@@ -15,6 +15,10 @@ public class Doom
 
     public const float CELL_WIDTH = WIDTH / GRID_COLS;
     public const float CELL_HEIGHT = HEIGHT / GRID_ROWS;
+
+    Player player = new Player();
+
+    Map map = new Map();
 
     public Doom()
     {
@@ -34,84 +38,80 @@ public class Doom
             _lastTime = currentTime;
             SplashKit.ProcessEvents();
             SplashKit.ClearScreen(backgroundColor);
-            Update(deltaTime);
+            Update((float)deltaTime);
             Render();
             SplashKit.RefreshScreen(144);
         }
     }
 
-    Vector2f circleA = new Vector2f(5.25f, 5.5f);
-    Vector2f circleB = new Vector2f(3.25f, 1.0f);
-
-
-    public void Update(double deltaTime)
+    public void Update(float deltaTime)
     {
-        Vector2f pos = new Vector2f(SplashKit.MousePosition());
-        pos.X /= CELL_WIDTH;
-        pos.Y /= CELL_HEIGHT;
-        circleB = pos;
-
-        Vector2f keyInput = new Vector2f();
-        if (SplashKit.KeyDown(KeyCode.WKey))
-        {
-            keyInput.Y = -1.0f;
-        }
-        if (SplashKit.KeyDown(KeyCode.AKey))
-        {
-            keyInput.X = -1.0f;
-        }
-        if (SplashKit.KeyDown(KeyCode.SKey))
-        {
-            keyInput.Y = 1.0f;
-        }
-        if (SplashKit.KeyDown(KeyCode.DKey))
-        {
-            keyInput.X = 1.0f;
-        }
-        float speed = 2.0f;
-        keyInput.Normalize();
-        // Console.WriteLine(keyInput.ToStr());
-        keyInput *= (float)deltaTime * speed;
-        circleA += keyInput;
-
-        DDA();
+        player.Update(deltaTime);
     }
 
-    public void Render()
+    public void RenderMinimap(float mapX, float mapY, float scale)
     {
         /* Draw Board */
         Color color = SplashKit.StringToColor("#505050");
         int lineWidth = 2;
 
+
+        // draw vertical lines
         for (int x = 0; x <= GRID_COLS; ++x)
         {
-            Vector2f start = new Vector2f(x, 0);
-            Vector2f end = new Vector2f(x, GRID_ROWS);
+            Vector2f start = new Vector2f(mapX + x, mapY) * CELL_WIDTH * scale;
+            Vector2f end = new Vector2f(mapX + x, mapY + GRID_ROWS) * CELL_WIDTH * scale;
             DanRenderer.DrawLine(color, start, end, lineWidth);
         }
 
+        // draw horizontal lines
         for (int y = 0; y <= GRID_ROWS; ++y)
         {
-            Vector2f start = new Vector2f(0, y);
-            Vector2f end = new Vector2f(GRID_COLS, y);
+            Vector2f start = new Vector2f(mapX, mapY + y) * CELL_HEIGHT * scale;
+            Vector2f end = new Vector2f(mapX + GRID_COLS, mapY + y) * CELL_HEIGHT * scale;
             DanRenderer.DrawLine(color, start, end, lineWidth);
         }
 
-        DanRenderer.DrawCircle(Color.CornflowerBlue, circleA, 25);
-        DanRenderer.DrawCircle(Color.Plum, circleB, 25);
-        DanRenderer.DrawLine(Color.Tan, circleA, circleB, 1);
+        // draw tiles
+        for (int x = 0; x < GRID_ROWS; ++x)
+        {
+            for (int y = 0; y < GRID_COLS; ++y)
+            {
+                if (map.isWall(x, y))
+                {
+                    Vector2f pos = new Vector2f((mapX + x) * CELL_WIDTH, (mapY + y) * CELL_HEIGHT) * scale;
+                    Vector2f size = new Vector2f(CELL_WIDTH, CELL_HEIGHT) * scale;
+                    DanRenderer.DrawRectangle(Color.Black, pos, size);
+                }
+            }
+        }
+        
+
+        DanRenderer.DrawCircle(Color.CornflowerBlue, DanRenderer.MapToWorld(player.Position) * scale, 25 * scale);
+        Vector2f col = DDA();
+        Vector2f line = col - player.Position;
+        DanRenderer.DrawCircle(Color.Tan, DanRenderer.MapToWorld(col) * scale, 25 * scale);
+        DanRenderer.DrawLine(Color.WhiteSmoke, DanRenderer.MapToWorld(player.Position + (player.Direction * scale)) * scale, DanRenderer.MapToWorld(col) * scale, lineWidth);
     }
 
-    public void DDA()
+    public void Render()
     {
-        Vector2f start = circleA;
-        Vector2f dir = circleB - circleA;
+        RenderMinimap(0.0f, 0.0f, 0.2f);
+    }
+
+    public Vector2f DDA()
+    {
+        Vector2f start = player.Position;
+        Vector2f dir = player.Direction * 10f;
         float dirMagnitude = dir.Magnitude;
 
         Vector2f stepSize = new Vector2f(dirMagnitude / MathF.Abs(dir.X), dirMagnitude / MathF.Abs(dir.Y));
         Vector2i stepSign = new Vector2i();
+        Vector2i mapCheck = new Vector2i((int)start.X, (int)start.Y);
 
         Vector2f len = new Vector2f();
+
+        bool hit = false;
 
         if (dir.X < 0) // going left
         {
@@ -143,17 +143,32 @@ public class Doom
         while (distance < dirMagnitude)
         {
             Vector2f coord = start + (dir.Normalized * distance);
-            DanRenderer.DrawCircle(Color.Red, coord, 8.5f);
+            //DanRenderer.DrawCircle(Color.Red, DanRenderer.MapToWorld(coord) * 0.2f, 6.5f);
             if (len.X < len.Y)
             {
                 distance = len.X;
                 len.X += stepSize.X;
+                mapCheck.X += stepSign.X;
             }
             else
             {
                 distance = len.Y;
                 len.Y += stepSize.Y;
+                mapCheck.Y += stepSign.Y;
+            }
+
+            bool outsideX = (int)coord.X > GRID_COLS;
+            bool outsideY = (int)coord.Y > GRID_COLS;
+            bool wallFound = map.isWall(mapCheck.X, mapCheck.Y);
+
+            if (wallFound || outsideX || outsideY)
+            {
+                hit = true;
+                coord = start + (dir.Normalized * distance);
+                Console.WriteLine($"hit found at {coord.ToStr()} map coords {mapCheck.ToStr()}");
+                return coord;
             }
         }
+        return Vector2f.Zero;
     }
 }
